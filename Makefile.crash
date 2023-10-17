@@ -1,0 +1,41 @@
+-include ../../Rules.mak
+
+CROSS = $(_CROSS)
+
+ifneq ($(strip $(CROSS)),)
+LINUX_HDR_DIR = $(ROOT)/kernel/linux/include
+else
+CROSS = /opt/toolchains/uclibc-crosstools-gcc-4.2.3-3/usr/bin/mips-linux-
+LINUX_HDR_DIR = ../../../bcm963xx_4.02L.03/kernel/linux/include
+endif
+
+CC = $(CROSS)gcc
+
+CFLAGHDRINC = -I$(LINUX_HDR_DIR)
+CFLAGDEFINE = -DARCH_MIPS
+
+CFLAGS += $(CFLAGHDRINC) $(CFLAGDEFINE) -fPIC -g
+
+OBJS = misc_crash.o misc_mipsbt.o
+
+all: libmisc.so
+
+libmisc.so : $(OBJS)
+	$(CC) -Os -s -shared -Wl,-soname,$@ -o $@ $^
+
+libbt.so: crash_test_lib.o
+	$(CC) -Os -g -shared -Wl,-soname,$@ -o $@ $^
+
+bt:
+	$(CC) -L./ -g -o bt crash_test.c -lmisc -lbt
+
+install:
+	install -D libmisc.so $(INSTALLDIR)/lib/
+	$(STRIP) $(INSTALLDIR)/lib/libmisc.so
+
+clean:
+	rm -rf *~ *.d *.so $(OBJS)
+
+-include $(BUILDPATH)/make.deprules
+
+-include $(OBJS:.o=.d)

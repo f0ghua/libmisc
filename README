@@ -1,0 +1,8 @@
+
+
+- Kernel core dump
+
+- App core dump
+  
+  * applications dump stack and useful info to mtdblock5(test partition).
+  * add a hidden page to get mtdblock5 content.
